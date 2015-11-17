@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"reflect"
 	"regexp"
 	"runtime"
 	"strings"
@@ -53,5 +55,33 @@ func log(title string, regex *regexp.Regexp, val string) {
 				}
 			}
 		}
+	}
+}
+
+func assert(t *testing.T, condition bool, msg string, v ...interface{}) {
+	if !condition {
+		_, file, line, _ := runtime.Caller(1)
+		t.Logf("\033[31m%s:%d: "+msg+"\033[39m\n\n",
+			append([]interface{}{filepath.Base(file), line}, v...)...)
+		t.FailNow()
+
+	}
+}
+
+func equal(t *testing.T, act, exp interface{}) {
+	if !reflect.DeepEqual(exp, act) {
+		_, file, line, _ := runtime.Caller(1)
+		t.Logf("\033[31m%s:%d:\n\n\texp: %#v\n\n\tgot: %#v\033[39m\n\n",
+			filepath.Base(file), line, exp, act)
+		t.FailNow()
+	}
+}
+
+func nequal(t *testing.T, act, exp interface{}) {
+	if reflect.DeepEqual(exp, act) {
+		_, file, line, _ := runtime.Caller(1)
+		t.Logf("\033[31m%s:%d:\n\n\tnexp: %#v\n\n\tgot:  %#v\033[39m\n\n",
+			filepath.Base(file), line, exp, act)
+		t.FailNow()
 	}
 }
